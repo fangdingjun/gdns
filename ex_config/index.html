@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Config example - gdns</title>
+  
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Config example";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script>
+  <script src="../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> gdns</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="..">Usage</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../command_line/">Command line options</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Config example</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#configure-example">Configure example</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#configure-file">Configure file</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#filter-file">Filter file</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#blacklist-file">Blacklist file</a></li>
+                
+            
+            </ul>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">gdns</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Config example</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="configure-example">Configure example</h1>
+<h1 id="configure-file">Configure file</h1>
+<p>Use <code>gdns -h &gt; config.ini</code> generate a example configure file</p>
+<p>a configure file like this:</p>
+<pre><code class="conf">bind = :53  # the address bind to
+blacklist =   # the blacklist file
+configUpdateInterval = 0  # Update interval for re-reading config file set via -config flag. Zero disables config file re-reading.
+debug = false  # output debug log, default false
+logfile =  error.log # the logfile, default stdout
+server = filter1.txt,udp:8.8.8.8:53  # special the filter and the upstream server to use when match
+    #       format:
+    #           FILTER_FILE_NAME,PROTOCOL:SERVER_NAME:PORT
+    #       example:
+    #           filter1.json,udp:8.8.8.8:53
+    #               means the domains in the filter1.json will use the google dns  server by udp
+    #       you can specail multiple filter and upstream server        
+    #         
+upstream = udp:114.114.114.114:53  # the default upstream server to use
+</code></pre>
+
+<p>comamnd
+<code>gdns -config dns.ini</code>
+use the dns.ini as a configure file</p>
+<h1 id="filter-file">Filter file</h1>
+<p>The filter file is a domains name list</p>
+<p>command line
+<code>--server domain1.json,udp:8.8.8.8:53</code>
+means the domain name listed in domoin1.json will use 8.8.8.8 as the upstream server through udp</p>
+<p>a filter file like this</p>
+<pre><code class="json">{
+    &quot;twitter.com&quot;:1,
+    &quot;facebook.com&quot;:1,
+    &quot;google.com&quot;:1
+}
+</code></pre>
+
+<p>you can special multiple filter file and upstream dns server</p>
+<h1 id="blacklist-file">Blacklist file</h1>
+<p>The blacklist file contains the ip that the message will be dropped when the ip dispeared in the upstream server reply</p>
+<p>the blacklist file like this</p>
+<pre><code class="json">{
+    &quot;113.123.21.43&quot;:1,
+    &quot;31.53.23.12&quot;:1
+}
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../command_line/" class="btn btn-neutral" title="Command line options"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../command_line/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+
+</body>
+</html>

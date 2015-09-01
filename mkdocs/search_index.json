@@ -1,0 +1,69 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "gdns\n\n\na dns proxy server write by go\n\n\ngdns much like dnsmasq or chinadns, but it can run on windows.\n\n\nFeatures\n\n\nsupport different domains use different upstream dns servers\n\n\nsupport contact to the upstream dns server by tcp or udp\n\n\nsupport blacklist list to block the fake ip\n\n\nInstall\n\n\n# get the depended library\ngo get github.com/miekg/dns\ngo get github.com/vharitonsky/iniflags\n\ngit clone https://github.com/fangdingjun/gdns\ncd gdns\ngo build\n\n# generate a sample config file\n./gdns -dumpflags \n dns.ini\n\n# edit the dns.ini and run, need root privileges to bind on port 53\nsudo ./gdns -config dns.ini\n\n# test it\ndig @localhost twitter.com\n\n\n\n\nArguments\n\n\nuse \ngdns -h\n to show the command line arguments.\n\n\nall arguments can specialed in config file or in command line.\n\n\nthere is a sample file in the \nconfig_sample/\n directory.\n\n\nThird-part library\n\n\nuse \n\ndns\n\nlibrary to parse the dns message\n\n\nuse\n\niniflags\n\nlibrary to process the command line arguments and the config file", 
+            "title": "Usage"
+        }, 
+        {
+            "location": "/#gdns", 
+            "text": "a dns proxy server write by go  gdns much like dnsmasq or chinadns, but it can run on windows.", 
+            "title": "gdns"
+        }, 
+        {
+            "location": "/#features", 
+            "text": "support different domains use different upstream dns servers  support contact to the upstream dns server by tcp or udp  support blacklist list to block the fake ip", 
+            "title": "Features"
+        }, 
+        {
+            "location": "/#install", 
+            "text": "# get the depended library\ngo get github.com/miekg/dns\ngo get github.com/vharitonsky/iniflags\n\ngit clone https://github.com/fangdingjun/gdns\ncd gdns\ngo build\n\n# generate a sample config file\n./gdns -dumpflags   dns.ini\n\n# edit the dns.ini and run, need root privileges to bind on port 53\nsudo ./gdns -config dns.ini\n\n# test it\ndig @localhost twitter.com", 
+            "title": "Install"
+        }, 
+        {
+            "location": "/#arguments", 
+            "text": "use  gdns -h  to show the command line arguments.  all arguments can specialed in config file or in command line.  there is a sample file in the  config_sample/  directory.", 
+            "title": "Arguments"
+        }, 
+        {
+            "location": "/#third-part-library", 
+            "text": "use  dns \nlibrary to parse the dns message  use iniflags \nlibrary to process the command line arguments and the config file", 
+            "title": "Third-part library"
+        }, 
+        {
+            "location": "/command_line/", 
+            "text": "command line options\n\n\nbind\n\n\nspecial the addres the dns server listen to\n\n\nexample: \n        \n-bind 0.0.0.0:53\n,\n        \n-bind :53\n,\n        \n-bind 127.0.0.1:53\n\n\nserver\n\n\nspecial a filter file and the upstream dns server to use      \n\nformat\n\n\nfile_name\n,\nproto\n:\naddr\n:\nport\n\n\nfile_name\n is the file name contains the domain list\n\n\nproto\n is the upstream dns server protocol, \ntcp\n or \nudp\n\n\naddr\n is the ip address of upstream dns server\n\n\nport\n is the upstream dns server port\n\n\nthis options can special multipe times\n\n\nexample:\n\n\n-server domain1.json:udp:8.8.8.8:53\n,\n\n\n-server domain1.json:tcp:4.2.2.2:53\n,\n\n\n-server domin2.json:udp:49.32.34.44:5353\n\n\nsee \nexample filter file\n   \n\n\nupstream\n\n\nspecial the default upstream dns server   \n\n\nformat\n\n\nproto\n:\naddr\n:\nport\n\n\nproto\n is the upstream dns server protocol, \ntcp\n or \nudp\n\n\naddr\n is the ip address of upstream dns server\n\n\nport\n is the upstream dns server port\n\n\nexample:\n\n\n-upstream udp:10.10.1.1:53\n\n\nlogfile\n\n\nspecial the file name the log save to\n\n\nexample:\n\n\n-logfile /var/log/gdns.log\n\n\ndebug\n\n\noutput the debug log or not, default false\n\n\nthis options is only used for debugging\n\n\nblacklist\n\n\nspecial the blacklist file\n\n\nif the reply dns message contains the ip in the blacklist, the message will be dropped\n\n\nexample:\n\n\n-blacklist fakeip.json\n\n\nsee \nexample black list", 
+            "title": "Command line options"
+        }, 
+        {
+            "location": "/command_line/#command-line-options", 
+            "text": "bind  special the addres the dns server listen to  example: \n         -bind 0.0.0.0:53 ,\n         -bind :53 ,\n         -bind 127.0.0.1:53  server  special a filter file and the upstream dns server to use       \nformat  file_name , proto : addr : port  file_name  is the file name contains the domain list  proto  is the upstream dns server protocol,  tcp  or  udp  addr  is the ip address of upstream dns server  port  is the upstream dns server port  this options can special multipe times  example:  -server domain1.json:udp:8.8.8.8:53 ,  -server domain1.json:tcp:4.2.2.2:53 ,  -server domin2.json:udp:49.32.34.44:5353  see  example filter file      upstream  special the default upstream dns server     format  proto : addr : port  proto  is the upstream dns server protocol,  tcp  or  udp  addr  is the ip address of upstream dns server  port  is the upstream dns server port  example:  -upstream udp:10.10.1.1:53  logfile  special the file name the log save to  example:  -logfile /var/log/gdns.log  debug  output the debug log or not, default false  this options is only used for debugging  blacklist  special the blacklist file  if the reply dns message contains the ip in the blacklist, the message will be dropped  example:  -blacklist fakeip.json  see  example black list", 
+            "title": "command line options"
+        }, 
+        {
+            "location": "/ex_config/", 
+            "text": "Configure example\n\n\nConfigure file\n\n\nUse \ngdns -h \n config.ini\n generate a example configure file\n\n\na configure file like this:\n\n\nbind = :53  # the address bind to\nblacklist =   # the blacklist file\nconfigUpdateInterval = 0  # Update interval for re-reading config file set via -config flag. Zero disables config file re-reading.\ndebug = false  # output debug log, default false\nlogfile =  error.log # the logfile, default stdout\nserver = filter1.txt,udp:8.8.8.8:53  # special the filter and the upstream server to use when match\n    #       format:\n    #           FILTER_FILE_NAME,PROTOCOL:SERVER_NAME:PORT\n    #       example:\n    #           filter1.json,udp:8.8.8.8:53\n    #               means the domains in the filter1.json will use the google dns  server by udp\n    #       you can specail multiple filter and upstream server        \n    #         \nupstream = udp:114.114.114.114:53  # the default upstream server to use\n\n\n\n\ncomamnd\n\ngdns -config dns.ini\n\nuse the dns.ini as a configure file\n\n\nFilter file\n\n\nThe filter file is a domains name list\n\n\ncommand line\n\n--server domain1.json,udp:8.8.8.8:53\n\nmeans the domain name listed in domoin1.json will use 8.8.8.8 as the upstream server through udp\n\n\na filter file like this\n\n\n{\n    \ntwitter.com\n:1,\n    \nfacebook.com\n:1,\n    \ngoogle.com\n:1\n}\n\n\n\n\nyou can special multiple filter file and upstream dns server\n\n\nBlacklist file\n\n\nThe blacklist file contains the ip that the message will be dropped when the ip dispeared in the upstream server reply\n\n\nthe blacklist file like this\n\n\n{\n    \n113.123.21.43\n:1,\n    \n31.53.23.12\n:1\n}", 
+            "title": "Config example"
+        }, 
+        {
+            "location": "/ex_config/#configure-example", 
+            "text": "", 
+            "title": "Configure example"
+        }, 
+        {
+            "location": "/ex_config/#configure-file", 
+            "text": "Use  gdns -h   config.ini  generate a example configure file  a configure file like this:  bind = :53  # the address bind to\nblacklist =   # the blacklist file\nconfigUpdateInterval = 0  # Update interval for re-reading config file set via -config flag. Zero disables config file re-reading.\ndebug = false  # output debug log, default false\nlogfile =  error.log # the logfile, default stdout\nserver = filter1.txt,udp:8.8.8.8:53  # special the filter and the upstream server to use when match\n    #       format:\n    #           FILTER_FILE_NAME,PROTOCOL:SERVER_NAME:PORT\n    #       example:\n    #           filter1.json,udp:8.8.8.8:53\n    #               means the domains in the filter1.json will use the google dns  server by udp\n    #       you can specail multiple filter and upstream server        \n    #         \nupstream = udp:114.114.114.114:53  # the default upstream server to use  comamnd gdns -config dns.ini \nuse the dns.ini as a configure file", 
+            "title": "Configure file"
+        }, 
+        {
+            "location": "/ex_config/#filter-file", 
+            "text": "The filter file is a domains name list  command line --server domain1.json,udp:8.8.8.8:53 \nmeans the domain name listed in domoin1.json will use 8.8.8.8 as the upstream server through udp  a filter file like this  {\n     twitter.com :1,\n     facebook.com :1,\n     google.com :1\n}  you can special multiple filter file and upstream dns server", 
+            "title": "Filter file"
+        }, 
+        {
+            "location": "/ex_config/#blacklist-file", 
+            "text": "The blacklist file contains the ip that the message will be dropped when the ip dispeared in the upstream server reply  the blacklist file like this  {\n     113.123.21.43 :1,\n     31.53.23.12 :1\n}", 
+            "title": "Blacklist file"
+        }
+    ]
+}
