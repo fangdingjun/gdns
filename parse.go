@@ -26,12 +26,12 @@ func load_domain(f string) (Kv, error) {
 func parse_addr(s string) (string, string, error) {
 	s2 := strings.Split(s, ":")
 	if len(s2) != 3 {
-		msg := Sprintf("error %s not well formatted\n", s2)
+		msg := Sprintf("error %s not well formatted", s)
 		err := errors.New(msg)
 		return "", "", err
 	}
 	if s2[0] != "tcp" && s2[0] != "udp" {
-		msg := Sprintf("invalid %s, only tcp or udp allowed\n", s2[0])
+		msg := Sprintf("invalid %s, only tcp or udp allowed", s2[0])
 		err := errors.New(msg)
 		return "", "", err
 	}
@@ -43,7 +43,7 @@ func parse_server(s string) (*UpstreamServer, error) {
 	s1 := strings.Split(s, ",")
 
 	if len(s1) != 2 {
-		msg := Sprintf("error %s not well formatted\n", s)
+		msg := Sprintf("error %s not well formatted", s)
 		err := errors.New(msg)
 		return nil, err
 	}
