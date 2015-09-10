@@ -1,3 +1,27 @@
+
+
+/*
+gdns is a dns proxy server write by go.
+
+gdns much like dnsmasq or chinadns, but it can run on windows.
+
+Features:
+
+    support different domains use different upstream dns servers
+    support contact to the upstream dns server by tcp or udp
+    support blacklist list to block the fake ip
+
+Usage:
+
+generate a config file and edit it
+    $ gdns -dumpflags > dns.ini
+
+
+run it
+    $ sudo gdns -config dns.ini
+
+
+*/
 package main
 
 import (
