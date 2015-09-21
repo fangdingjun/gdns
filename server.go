@@ -1,5 +1,3 @@
-
-
 /*
 gdns is a dns proxy server write by go.
 
@@ -41,6 +39,9 @@ var Blacklist_ips Kv = nil
 
 var debug bool = false
 
+var hostfile string = ""
+var record_hosts Hosts = nil
+
 func in_blacklist(m *dns.Msg) bool {
 	if Blacklist_ips == nil {
 		return false
@@ -67,6 +68,25 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 	domain := r.Question[0].Name
 
 	var done int
+
+	/*
+	   reply from hosts
+	*/
+	if record_hosts != nil {
+		rr := record_hosts.Get(domain, r.Question[0].Qtype)
+		if rr != nil {
+			msg := new(dns.Msg)
+			msg.SetReply(r)
+			msg.Answer = append(msg.Answer, rr)
+			w.WriteMsg(msg)
+			logger.Debug("query %s %s %s, reply from hosts\n",
+				domain,
+				dns.ClassToString[r.Question[0].Qclass],
+				dns.TypeToString[r.Question[0].Qtype],
+			)
+			return
+		}
+	}
 
 	for i := 0; i < 2; i++ {
 		done = 0

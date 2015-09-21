@@ -68,6 +68,17 @@ func parse_flags() {
 	} else {
 		Blacklist_ips = a
 	}
+
+	if hostfile == "" {
+		hostfile = GetHost()
+	}
+
+	if hostfile != "" {
+		record_hosts, err = ReadHosts(hostfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func init() {
@@ -83,7 +94,8 @@ func init() {
 
 	flag.StringVar(&bind_addr, "bind", ":53", "the address bind to")
 	flag.StringVar(&default_server, "upstream", "udp:114.114.114.114:53", "the default upstream server to use")
-	flag.StringVar(&logfile, "logfile", "error.log", "the logfile, default stdout")
+	flag.StringVar(&logfile, "logfile", "", "the logfile, default stdout")
 	flag.StringVar(&blacklist_file, "blacklist", "", "the blacklist file")
 	flag.BoolVar(&debug, "debug", false, "output debug log, default false")
+	flag.StringVar(&hostfile, "hosts", "", "load special ip from hosts or /etc/hosts")
 }

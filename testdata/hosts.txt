@@ -1,0 +1,8 @@
+127.0.0.1 localhost localhost.localdomain
+192.168.1.1 gw
+::1		localhost
+
+
+192.243.112.217        www.ratafee.nl
+   2607:8700:103:9b22:: www.ratafee.nl
+# 127.0.0.1 ccc.com
