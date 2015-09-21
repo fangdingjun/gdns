@@ -60,7 +60,7 @@ func ReadHosts(fn string) (Hosts, error) {
 		}
 
 		sline := string(bline)
-		sline = strings.Trim(sline, " ")
+		sline = strings.TrimSpace(sline)
 
 		/* empty line */
 		if sline == "" {
@@ -72,12 +72,9 @@ func ReadHosts(fn string) (Hosts, error) {
 			continue
 		}
 
-		/* replace tab to space */
-		sline = strings.Replace(sline, "\t", " ", -1)
+		lns := strings.Fields(sline)
 
-		lns := strings.Split(sline, " ")
-
-		if len(lns) < 1 {
+		if len(lns) < 2 {
 			return nil, errors.New(fmt.Sprintf("invalid hosts line: %s", sline))
 		}
 
@@ -94,7 +91,7 @@ func ReadHosts(fn string) (Hosts, error) {
 
 		for _, dn := range lns[1:] {
 
-			dd := dns.Fqdn(strings.Trim(dn, " "))
+			dd := dns.Fqdn(strings.TrimSpace(dn))
 
 			/* ignore space */
 			if dd == "." {
