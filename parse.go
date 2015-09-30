@@ -7,6 +7,8 @@ import (
 	"github.com/miekg/dns"
 	"io/ioutil"
 	"log"
+	"net"
+	"strconv"
 	"strings"
 )
 
@@ -24,19 +26,38 @@ func load_domain(f string) (Kv, error) {
 }
 
 func parse_addr(s string) (string, string, error) {
-	s2 := strings.Split(s, ":")
-	if len(s2) != 3 {
+	s2 := strings.SplitN(s, ":", 2)
+
+	if len(s2) != 2 {
 		msg := Sprintf("error %s not well formatted", s)
 		err := errors.New(msg)
 		return "", "", err
 	}
+
 	if s2[0] != "tcp" && s2[0] != "udp" {
 		msg := Sprintf("invalid %s, only tcp or udp allowed", s2[0])
 		err := errors.New(msg)
 		return "", "", err
 	}
-	t := Sprintf("%s:%s", s2[1], s2[2])
-	return s2[0], t, nil
+
+	host, port, err := net.SplitHostPort(s2[1])
+	if err != nil {
+		return "", "", err
+	}
+
+	/* check host */
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return "", "", errors.New(Sprintf("invalid host %s", host))
+	}
+
+	/* check port */
+	_, err = strconv.Atoi(port)
+	if err != nil {
+		return "", "", err
+	}
+
+	return s2[0], s2[1], nil
 }
 
 func parse_server(s string) (*UpstreamServer, error) {
