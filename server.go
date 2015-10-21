@@ -105,40 +105,49 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 		done = 0
 		for _, sv := range Servers {
 			if sv.match(domain) {
-				logger.Debug("%s query %s %s %s, forward to %s:%s\n",
+
+				res, err = sv.query(r)
+				if err != nil {
+					logger.Error("%s", err)
+					continue
+				}
+
+				logger.Debug("%s query %s %s %s, forward to %s:%s, %s\n",
 					w.RemoteAddr(),
 					domain,
 					dns.ClassToString[r.Question[0].Qclass],
 					dns.TypeToString[r.Question[0].Qtype],
-					sv.Proto, sv.Addr)
-				res, err = sv.query(r)
-				if err == nil {
-					if !in_blacklist(res) && res.Rcode != dns.RcodeServerFailure {
-						w.WriteMsg(res)
-						done = 1
-						break
-					}
-				} else {
-					logger.Error("%s", err)
+					sv.Proto, sv.Addr,
+					dns.RcodeToString[res.Rcode],
+				)
+
+				if res.Rcode != dns.RcodeServerFailure && !in_blacklist(res) {
+					w.WriteMsg(res)
+					done = 1
+					break
 				}
 			}
 		}
 
 		if done != 1 {
 			res, err = DefaultServer.query(r)
-			logger.Debug("%s query %s %s %s, use default server %s:%s\n",
+			if err != nil {
+				logger.Error("%s", err)
+				continue
+			}
+
+			logger.Debug("%s query %s %s %s, use default server %s:%s, %s\n",
 				w.RemoteAddr(),
 				domain,
 				dns.ClassToString[r.Question[0].Qclass],
 				dns.TypeToString[r.Question[0].Qtype],
-				DefaultServer.Proto, DefaultServer.Addr)
-			if err == nil {
-				if !in_blacklist(res) && res.Rcode != dns.RcodeServerFailure {
-					w.WriteMsg(res)
-					done = 1
-				}
-			} else {
-				logger.Error("%s", err)
+				DefaultServer.Proto, DefaultServer.Addr,
+				dns.RcodeToString[res.Rcode],
+			)
+
+			if res.Rcode != dns.RcodeServerFailure && !in_blacklist(res) {
+				w.WriteMsg(res)
+				done = 1
 			}
 		}
 
