@@ -9,7 +9,7 @@ import (
 
 var bind_addr string
 
-var default_server string
+var default_server ArgSrvs
 
 var srv ArgSrvs
 
@@ -17,7 +17,7 @@ var logfile string
 
 type ArgSrvs []string
 
-var DefaultServer *UpstreamServer
+var DefaultServer []*UpstreamServer
 
 var blacklist_file string
 
@@ -44,22 +44,29 @@ func parse_flags() {
 		}
 	}
 
-	proto, addr, err := parse_addr(default_server)
-	if err != nil {
-		log.Fatal(err)
+	for _, dsvr := range default_server {
+		proto, addr, err := parse_addr(dsvr)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var c *dns.Client
+		if proto == "udp" {
+			c = client_udp
+		} else {
+			c = client_tcp
+		}
+
+		upsrv := &UpstreamServer{
+			Addr:   addr,
+			Proto:  proto,
+			client: c,
+		}
+		DefaultServer = append(DefaultServer, upsrv)
 	}
 
-	var c *dns.Client
-	if proto == "udp" {
-		c = client_udp
-	} else {
-		c = client_tcp
-	}
-
-	DefaultServer = &UpstreamServer{
-		Addr:   addr,
-		Proto:  proto,
-		client: c,
+	if len(DefaultServer) == 0 {
+		log.Fatal("please special a -upstream")
 	}
 
 	a, err := load_domain(blacklist_file)
@@ -93,7 +100,7 @@ func init() {
         `)
 
 	flag.StringVar(&bind_addr, "bind", ":53", "the address bind to")
-	flag.StringVar(&default_server, "upstream", "udp:114.114.114.114:53", "the default upstream server to use")
+	flag.Var(&default_server, "upstream", "special the upstream server to use")
 	flag.StringVar(&logfile, "logfile", "", "the logfile, default stdout")
 	flag.StringVar(&blacklist_file, "blacklist", "", "the blacklist file")
 	flag.BoolVar(&debug, "debug", false, "output debug log, default false")
