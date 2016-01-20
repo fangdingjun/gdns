@@ -108,27 +108,29 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 
 	key := fmt.Sprintf("%s_%s", domain, dns.TypeToString[r.Question[0].Qtype])
 
-	// reply from cache
-	if a, ok := dns_cache.Get(key); ok {
-		msg := new(dns.Msg)
-		msg.SetReply(r)
+	if enable_cache {
+		// reply from cache
+		if a, ok := dns_cache.Get(key); ok {
+			msg := new(dns.Msg)
+			msg.SetReply(r)
 
-		aa := strings.Split(a.(string), "|")
-		for _, a1 := range aa {
-			rr, _ := dns.NewRR(a1)
-			if rr != nil {
-				msg.Answer = append(msg.Answer, rr)
+			aa := strings.Split(a.(string), "|")
+			for _, a1 := range aa {
+				rr, _ := dns.NewRR(a1)
+				if rr != nil {
+					msg.Answer = append(msg.Answer, rr)
+				}
 			}
-		}
 
-		w.WriteMsg(msg)
-		logger.Debug("%s query %s %s %s, reply from cache\n",
-			w.RemoteAddr(),
-			domain,
-			dns.ClassToString[r.Question[0].Qclass],
-			dns.TypeToString[r.Question[0].Qtype],
-		)
-		return
+			w.WriteMsg(msg)
+			logger.Debug("%s query %s %s %s, reply from cache\n",
+				w.RemoteAddr(),
+				domain,
+				dns.ClassToString[r.Question[0].Qclass],
+				dns.TypeToString[r.Question[0].Qtype],
+			)
+			return
+		}
 	}
 
 	// forward to upstream server
@@ -153,12 +155,14 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 				)
 
 				if res.Rcode != dns.RcodeServerFailure && !in_blacklist(res) {
-					// add to cache
-					v := []string{}
-					for _, as := range res.Answer {
-						v = append(v, as.String())
+					if enable_cache {
+						// add to cache
+						v := []string{}
+						for _, as := range res.Answer {
+							v = append(v, as.String())
+						}
+						dns_cache.Add(key, strings.Join(v, "|"))
 					}
-					dns_cache.Add(key, strings.Join(v, "|"))
 					w.WriteMsg(res)
 					done = 1
 					break
@@ -168,34 +172,27 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 
 		// fallback to default upstream server
 		if done != 1 {
-			for _, dfsrv := range DefaultServer {
-				res, err = dfsrv.query(r)
-				if err != nil {
-					logger.Error("%s", err)
-					continue
-				}
-
-				logger.Debug("%s query %s %s %s, use default server %s:%s, %s\n",
-					w.RemoteAddr(),
-					domain,
-					dns.ClassToString[r.Question[0].Qclass],
-					dns.TypeToString[r.Question[0].Qtype],
-					dfsrv.Proto, dfsrv.Addr,
-					dns.RcodeToString[res.Rcode],
-				)
-
-				if res.Rcode != dns.RcodeServerFailure && !in_blacklist(res) {
+			logger.Debug("%s query %s %s %s, use default server\n",
+				w.RemoteAddr(),
+				domain,
+				dns.ClassToString[r.Question[0].Qclass],
+				dns.TypeToString[r.Question[0].Qtype],
+			)
+			res := query(r)
+			if res != nil {
+				if enable_cache {
 					// add to cache
 					v := []string{}
 					for _, as := range res.Answer {
 						v = append(v, as.String())
 					}
 					dns_cache.Add(key, strings.Join(v, "|"))
-					w.WriteMsg(res)
-					done = 1
-					break
 				}
+				w.WriteMsg(res)
+				done = 1
+				break
 			}
+
 		}
 
 		if done == 1 {
@@ -212,11 +209,12 @@ func main() {
 	parse_flags()
 
 	var err error
-
-	// create cache
-	dns_cache, err = lru.New(1000)
-	if err != nil {
-		log.Fatal(err)
+	if enable_cache {
+		// create cache
+		dns_cache, err = lru.New(1000)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	dns.HandleFunc(".", handleRoot)

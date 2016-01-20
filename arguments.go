@@ -21,6 +21,10 @@ var DefaultServer []*UpstreamServer
 
 var blacklist_file string
 
+var enable_cache = false
+
+var region_file = ""
+
 func (s *ArgSrvs) String() string {
 	//Sprintf("%s", s)
 	return "filter1.txt,udp:8.8.8.8:53"
@@ -86,6 +90,10 @@ func parse_flags() {
 			log.Fatal(err)
 		}
 	}
+
+	if region_file != "" {
+		ip_region = parse_net(region_file)
+	}
 }
 
 func init() {
@@ -105,4 +113,6 @@ func init() {
 	flag.StringVar(&blacklist_file, "blacklist", "", "the blacklist file")
 	flag.BoolVar(&debug, "debug", false, "output debug log, default false")
 	flag.StringVar(&hostfile, "hosts", "", "load special ip from hosts or /etc/hosts")
+	flag.BoolVar(&enable_cache, "enable_cache", false, "enable cache or not")
+	flag.StringVar(&region_file, "region_file", "", "local country region ip range file")
 }
