@@ -17,7 +17,7 @@ func TestServerMathNil(t *testing.T) {
 }
 
 func TestServerMatch(t *testing.T) {
-	d := Kv{"twitter.com": 1, "google.com": 1}
+	d := Kv{"twitter.com": 1, "google.com": 1, "cn": 1}
 	srv := UpstreamServer{domains: d}
 
 	test_domains := map[string]bool{
@@ -33,6 +33,7 @@ func TestServerMatch(t *testing.T) {
 		"twitter.com.aa.com":        false,
 		"google.com.cccc.com":       false,
 		"google.com.aeddasdfc3.com": false,
+		"ip.cn":                     true,
 	}
 
 	for d, r := range test_domains {

@@ -27,7 +27,7 @@ var region_file = ""
 
 func (s *ArgSrvs) String() string {
 	//Sprintf("%s", s)
-	return "filter1.txt,udp:8.8.8.8:53"
+	return ""
 }
 
 func (s *ArgSrvs) Set(s1 string) error {

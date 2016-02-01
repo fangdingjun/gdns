@@ -68,6 +68,11 @@ func in_region(ip net.IP, nets []*net.IPNet) bool {
 
 // test dns reply A or AAAA in special ip range region
 func answer_in_region(m *dns.Msg, nets []*net.IPNet) bool {
+	// no region loaded, return true
+	if len(nets) == 0 {
+		return true
+	}
+
 	for _, rr := range m.Answer {
 		if a, ok := rr.(*dns.A); ok {
 			if in_region(a.A, nets) {

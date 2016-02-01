@@ -1,20 +1,21 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/miekg/dns"
 	"testing"
+	"time"
 	//"os"
 )
 
 func TestParseNet(t *testing.T) {
-	nets := parse_net("net_china.txt")
-	fmt.Printf("get %d networks\n", len(nets))
-	fmt.Printf("1st %s\n", nets[0].String())
+	nets := parse_net("region_cn.txt")
+	t.Logf("get %d networks\n", len(nets))
+	t.Logf("1st %s\n", nets[0].String())
 }
 
 func TestQuery(t *testing.T) {
-	ip_region = parse_net("net_china.txt")
+	ip_region = parse_net("region_cn.txt")
 	var c *dns.Client
 	for _, srv := range []string{
 		"tcp:114.114.114.114:53",
@@ -41,7 +42,7 @@ func TestQuery(t *testing.T) {
 	blacklist_file = "blacklist.txt"
 	a, err := load_domain(blacklist_file)
 	if err != nil {
-		fmt.Println(err)
+		t.Log(err)
 	} else {
 		Blacklist_ips = a
 	}
@@ -65,10 +66,18 @@ func TestQuery(t *testing.T) {
 	} {
 		m := new(dns.Msg)
 		m.SetQuestion(dns.Fqdn(dn), dns.TypeA)
+		t1 := time.Now()
 		m1 := query(m)
+		t2 := time.Now()
 		if m1 == nil {
-			t.Error("query failed")
+			t.Errorf("query %s failed", dn)
+		} else {
+			t.Logf("query time: %s\n", t2.Sub(t1))
+			t.Logf("result of %s\n", dn)
+			for _, a1 := range m1.Answer {
+				t.Logf("%s\n", a1)
+			}
+			//.Printf("\n")
 		}
-		fmt.Printf("%s\n", m1)
 	}
 }

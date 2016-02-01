@@ -154,7 +154,8 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 					dns.RcodeToString[res.Rcode],
 				)
 
-				if res.Rcode != dns.RcodeServerFailure && !in_blacklist(res) {
+				if res.Rcode == dns.RcodeSuccess &&
+					!in_blacklist(res) && len(res.Answer) > 0 {
 					if enable_cache {
 						// add to cache
 						v := []string{}
@@ -180,7 +181,9 @@ func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
 			)
 			res := query(r)
 			if res != nil {
-				if enable_cache {
+				//logger.Debug("get: %s", res)
+				if enable_cache && res.Rcode == dns.RcodeSuccess &&
+					len(res.Answer) > 0 {
 					// add to cache
 					v := []string{}
 					for _, as := range res.Answer {

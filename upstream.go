@@ -20,8 +20,7 @@ func (srv *UpstreamServer) match(d string) bool {
 	}
 
 	s := strings.Split(strings.Trim(d, "."), ".")
-
-	for i := 0; i < len(s)-1; i++ {
+	for i := 0; i < len(s); i++ {
 		s1 := strings.Join(s[i:], ".")
 		if _, ok := srv.domains[s1]; ok {
 			return true
