@@ -12919,5 +12919,7 @@
     "mmbang.info": 1, 
     "fequan.com": 1, 
     "fangdd.com": 1, 
-    "qianzhan.com": 1
+    "qianzhan.com": 1,
+    "simicloud.com": 1,
+    "i4season.com": 1
 }
