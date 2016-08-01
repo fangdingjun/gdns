@@ -1,0 +1,16 @@
+{
+    "listen":["tcp:0.0.0.0:8053","udp::8053"],
+    "default_servers":["tcp:114.114.114.114:53","tcp:8.8.8.8:53"],
+    "timeout":1,
+    "blacklist_ips":["ip.txt"],
+    "rules":[
+        {
+            "domain_list_file":"domain1.txt",
+            "servers":["tcp:4.2.2.2:53"]
+        },
+        {
+            "domain_list_file":"domain2.txt",
+            "servers":["tcp:8.8.4.4:53"]
+        }
+    ]
+}
