@@ -6,7 +6,6 @@ a dns forward proxy write by go
 **Features**
 
 - support listen tcp and udp protocol
-- support configure different domains forward to different upstream servers
+- support configure different domains to forward to different upstream servers
 - support tcp or udp to communicate to upstream servers
-- support ip blacklist, drop unwanted dns reply
-
+- support ip blacklist to filter unwanted dns reply
