@@ -1,6 +1,6 @@
 {
     "listen":["tcp:0.0.0.0:8053","udp::8053"],
-    "default_servers":["tcp:114.114.114.114:53","tcp:8.8.8.8:53"],
+    "default_servers":["tcp:208.67.222.222:53","tcp:8.8.8.8:53"],
     "timeout":1,
     "blacklist_ips":["ip.txt"],
     "rules":[

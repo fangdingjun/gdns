@@ -8,9 +8,10 @@ import (
 )
 
 type routers struct {
-	c   *cfg
-	tcp *dns.Client
-	udp *dns.Client
+	c     *cfg
+	tcp   *dns.Client
+	udp   *dns.Client
+	cache *cache
 }
 
 func (r routers) checkBlacklist(m *dns.Msg) bool {
@@ -39,6 +40,15 @@ func (r routers) checkBlacklist(m *dns.Msg) bool {
 func (r routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 	var up *dns.Client
 	var lastErr error
+
+	// query cache
+	m2 := r.cache.get(m)
+	if m2 != nil {
+		log.Printf("query %s, reply from cache\n", m.Question[0].Name)
+		m2.Id = m.Id
+		return m2, nil
+	}
+
 	for _, srv := range servers {
 		switch srv.network {
 		case "tcp":
@@ -51,9 +61,13 @@ func (r routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 
 		log.Printf("query %s use %s:%s\n", m.Question[0].Name, srv.network, srv.addr)
 
-		m, _, err := up.Exchange(m, srv.addr)
+		m1, _, err := up.Exchange(m, srv.addr)
 		if err == nil && !r.checkBlacklist(m) {
-			return m, err
+			if m1.Rcode == dns.RcodeSuccess {
+				// store to cache
+				r.cache.set(m1)
+			}
+			return m1, err
 		}
 
 		log.Println(err)
@@ -74,9 +88,10 @@ func (r routers) ServeDNS(w dns.ResponseWriter, m *dns.Msg) {
 			if err == nil {
 				w.WriteMsg(m1)
 				return
-			} else {
-				log.Println(err)
 			}
+
+			log.Println(err)
+
 		}
 	}
 
@@ -95,6 +110,7 @@ func initRouters(c *cfg) {
 		c,
 		&dns.Client{Net: "tcp", Timeout: time.Duration(c.Timeout) * time.Second},
 		&dns.Client{Net: "udp", Timeout: time.Duration(c.Timeout) * time.Second},
+		newCache(1000, 5*60*60), // cache 5 hours
 	}
 	dns.Handle(".", router)
 }

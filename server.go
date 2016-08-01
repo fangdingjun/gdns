@@ -17,8 +17,10 @@ func initListeners(c *cfg) {
 
 func main() {
 	var configFile string
+
 	flag.StringVar(&configFile, "c", "", "config file")
 	flag.Parse()
+
 	config, err := parseCfg(configFile)
 	if err != nil {
 		log.Println(err)
@@ -27,5 +29,6 @@ func main() {
 
 	initRouters(config)
 	initListeners(config)
+
 	select {}
 }
