@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/miekg/dns"
 	"log"
 	"strings"
@@ -14,7 +15,7 @@ type routers struct {
 	cache *cache
 }
 
-func (r routers) checkBlacklist(m *dns.Msg) bool {
+func (r *routers) checkBlacklist(m *dns.Msg) bool {
 	if m.Rcode != dns.RcodeSuccess {
 		// not success, not in blacklist
 		return false
@@ -37,7 +38,7 @@ func (r routers) checkBlacklist(m *dns.Msg) bool {
 	return false
 }
 
-func (r routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
+func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 	var up *dns.Client
 	var lastErr error
 
@@ -74,12 +75,17 @@ func (r routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 		lastErr = err
 	}
 
+	if lastErr == nil {
+		// this happens when ip in blacklist
+		lastErr = errors.New("timeout")
+	}
+
 	// return last error
 	return nil, lastErr
 }
 
 // ServeDNS implements dns.Handler interface
-func (r routers) ServeDNS(w dns.ResponseWriter, m *dns.Msg) {
+func (r *routers) ServeDNS(w dns.ResponseWriter, m *dns.Msg) {
 	domain := m.Question[0].Name
 	d := strings.Trim(domain, ".")
 	for _, rule := range r.c.Rules {

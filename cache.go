@@ -12,7 +12,7 @@ import (
 
 type cache struct {
 	m    map[string]*elem
-	lock sync.RWMutex
+	lock *sync.RWMutex
 	ttl  int64
 	max  int
 }
@@ -27,7 +27,7 @@ func newCache(max int, ttl int64) *cache {
 		max:  max,
 		ttl:  ttl,
 		m:    map[string]*elem{},
-		lock: sync.RWMutex{},
+		lock: new(sync.RWMutex),
 	}
 }
 
@@ -44,7 +44,7 @@ func key(m *dns.Msg) string {
 	return s1
 }
 
-func (c cache) get(m *dns.Msg) *dns.Msg {
+func (c *cache) get(m *dns.Msg) *dns.Msg {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	k := key(m)
@@ -57,7 +57,7 @@ func (c cache) get(m *dns.Msg) *dns.Msg {
 	return nil
 }
 
-func (c cache) set(m *dns.Msg) {
+func (c *cache) set(m *dns.Msg) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -74,7 +74,7 @@ func (c cache) set(m *dns.Msg) {
 }
 
 // must hold the write lock
-func (c cache) cleanOld() {
+func (c *cache) cleanOld() {
 	t1 := time.Now().Unix()
 	for k, v := range c.m {
 		if v.t >= t1 {
