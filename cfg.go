@@ -129,12 +129,12 @@ func parseFile(fn string, i *item) {
 		line, err := r.ReadString('\n')
 		l := strings.Trim(line, " \r\n\t")
 		if err != nil {
-			if l != "" {
+			if l != "" && l[0] != '#' {
 				ii[l] = 1
 			}
 			break
 		}
-		if l == "" {
+		if l == "" || l[0] == '#' {
 			continue
 		}
 		ii[l] = 1
