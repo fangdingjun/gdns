@@ -48,6 +48,7 @@ type cfg struct {
 	ServersString  []string `json:"default_servers"`
 	servers        []addr
 	Timeout        int      `json:"timeout"`
+	TTL            int      `json:"ttl"`
 	BlacklistFiles []string `json:"blacklist_ips"`
 	blacklistIps   item
 	Rules          []Rule `json:"rules"`

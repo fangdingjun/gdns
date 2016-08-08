@@ -116,7 +116,7 @@ func initRouters(c *cfg) {
 		c,
 		&dns.Client{Net: "tcp", Timeout: time.Duration(c.Timeout) * time.Second},
 		&dns.Client{Net: "udp", Timeout: time.Duration(c.Timeout) * time.Second},
-		newCache(1000, 5*60*60), // cache 5 hours
+		newCache(1000, int64(c.TTL)), // cache 5 hours
 	}
 	dns.Handle(".", router)
 }
