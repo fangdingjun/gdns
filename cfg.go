@@ -44,6 +44,8 @@ type Rule struct {
 
 type cfg struct {
 	Listen         []string `json:"listen"`
+	User           string   `json:"user"`
+	Group          string   `json:"group"`
 	listen         []addr
 	ServersString  []string `json:"default_servers"`
 	servers        []addr
