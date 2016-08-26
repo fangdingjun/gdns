@@ -57,13 +57,11 @@ type cfg struct {
 }
 
 func parseCfg(fn string) (*cfg, error) {
-	fp, err := os.Open(fn)
+	c := cfg{}
+	buf, err := ioutil.ReadFile(fn)
 	if err != nil {
 		return nil, err
 	}
-	defer fp.Close()
-	c := cfg{}
-	buf, err := ioutil.ReadAll(fp)
 	err = json.Unmarshal(buf, &c)
 	if err != nil {
 		return nil, err
