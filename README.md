@@ -9,3 +9,4 @@ a dns forward proxy write by go
 - support configure different domains to forward to different upstream servers
 - support tcp or udp to communicate to upstream servers
 - support ip blacklist to filter unwanted dns reply
+- support google https dns

@@ -13,7 +13,7 @@
         },
         {
             "domain_list_file":"domain2.txt",
-            "servers":["tcp:8.8.4.4:53"]
+            "servers":["tcp:8.8.4.4:53","https:74.125.200.100"]
         }
     ]
 }

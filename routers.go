@@ -38,8 +38,12 @@ func (r *routers) checkBlacklist(m *dns.Msg) bool {
 	return false
 }
 
+type dnsClient interface {
+	Exchange(*dns.Msg, string) (*dns.Msg, time.Duration, error)
+}
+
 func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
-	var up *dns.Client
+	var up dnsClient
 	var lastErr error
 
 	// query cache
@@ -56,6 +60,8 @@ func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 			up = r.tcp
 		case "udp":
 			up = r.udp
+		case "https":
+			up = DefaultHTTPDnsClient
 		default:
 			up = r.udp
 		}
