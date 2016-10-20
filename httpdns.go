@@ -32,7 +32,7 @@ func (h *HTTPDns) getMyIP() string {
 }
 
 type ipAPI struct {
-	Ip string `json:"origin"`
+	IP string `json:"origin"`
 }
 
 func (h *HTTPDns) queryMyIP() {
@@ -62,7 +62,7 @@ func (h *HTTPDns) queryMyIP() {
 		return
 	}
 	//fmt.Printf("got: %s\n", ip.Ip)
-	h.myip = ip.Ip
+	h.myip = ip.IP
 }
 
 func (h *HTTPDns) getMyNet() string {
@@ -130,7 +130,7 @@ type RR struct {
 }
 
 var httpclient = &http.Client{
-	Timeout: 3 * time.Second,
+	Timeout: 5 * time.Second,
 	Transport: &http.Transport{
 		TLSClientConfig:     &tls.Config{ServerName: "dns.google.com"},
 		TLSHandshakeTimeout: 3 * time.Second,

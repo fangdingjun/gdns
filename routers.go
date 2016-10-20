@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/miekg/dns"
-	"log"
+	//"log"
 	"strings"
 	"time"
 )
@@ -30,7 +30,7 @@ func (r *routers) checkBlacklist(m *dns.Msg) bool {
 		}
 
 		if ip != "" && r.c.blacklistIps.has(ip) {
-			log.Printf("%s is in blacklist.\n", ip)
+			//log.Printf("%s is in blacklist.\n", ip)
 			return true
 		}
 
@@ -49,7 +49,7 @@ func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 	// query cache
 	m2 := r.cache.get(m)
 	if m2 != nil {
-		log.Printf("query %s, reply from cache\n", m.Question[0].Name)
+		//log.Printf("query %s, reply from cache\n", m.Question[0].Name)
 		m2.Id = m.Id
 		return m2, nil
 	}
@@ -66,7 +66,7 @@ func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 			up = r.udp
 		}
 
-		log.Printf("query %s use %s:%s\n", m.Question[0].Name, srv.network, srv.addr)
+		//log.Printf("query %s use %s:%s\n", m.Question[0].Name, srv.network, srv.addr)
 
 		m1, _, err := up.Exchange(m, srv.addr)
 		if err == nil && !r.checkBlacklist(m) {
@@ -77,7 +77,7 @@ func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 			return m1, err
 		}
 
-		log.Println(err)
+		//log.Println(err)
 		lastErr = err
 	}
 
@@ -102,7 +102,7 @@ func (r *routers) ServeDNS(w dns.ResponseWriter, m *dns.Msg) {
 				return
 			}
 
-			log.Println(err)
+			//log.Println(err)
 
 		}
 	}
@@ -110,7 +110,7 @@ func (r *routers) ServeDNS(w dns.ResponseWriter, m *dns.Msg) {
 	// no match or failed, fallback to default
 	m1, err := r.query(m, r.c.servers)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		dns.HandleFailed(w, m)
 	} else {
 		w.WriteMsg(m1)
