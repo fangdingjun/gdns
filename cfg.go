@@ -43,6 +43,7 @@ type Rule struct {
 }
 
 type cfg struct {
+	EnableCache    bool     `json:"enable_cache"`
 	Listen         []string `json:"listen"`
 	User           string   `json:"user"`
 	Group          string   `json:"group"`

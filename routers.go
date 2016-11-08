@@ -46,12 +46,14 @@ func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 	var up dnsClient
 	var lastErr error
 
-	// query cache
-	m2 := r.cache.get(m)
-	if m2 != nil {
-		//log.Printf("query %s, reply from cache\n", m.Question[0].Name)
-		m2.Id = m.Id
-		return m2, nil
+	if r.c.EnableCache {
+		// query cache
+		m2 := r.cache.get(m)
+		if m2 != nil {
+			//log.Printf("query %s, reply from cache\n", m.Question[0].Name)
+			m2.Id = m.Id
+			return m2, nil
+		}
 	}
 
 	for _, srv := range servers {
@@ -70,7 +72,7 @@ func (r *routers) query(m *dns.Msg, servers []addr) (*dns.Msg, error) {
 
 		m1, _, err := up.Exchange(m, srv.addr)
 		if err == nil && !r.checkBlacklist(m) {
-			if m1.Rcode == dns.RcodeSuccess {
+			if m1.Rcode == dns.RcodeSuccess && r.c.EnableCache {
 				// store to cache
 				r.cache.set(m1)
 			}
@@ -118,11 +120,15 @@ func (r *routers) ServeDNS(w dns.ResponseWriter, m *dns.Msg) {
 }
 
 func initRouters(c *cfg) {
+	var cache1 *cache = nil
+	if c.EnableCache {
+		cache1 = newCache(1000, int64(c.TTL)) // cache 5 hours
+	}
 	router := &routers{
 		c,
 		&dns.Client{Net: "tcp", Timeout: time.Duration(c.Timeout) * time.Second},
 		&dns.Client{Net: "udp", Timeout: time.Duration(c.Timeout) * time.Second},
-		newCache(1000, int64(c.TTL)), // cache 5 hours
+		cache1,
 	}
 	dns.Handle(".", router)
 }

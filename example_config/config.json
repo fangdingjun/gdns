@@ -5,6 +5,7 @@
     "group":"nogroup",
     "ttl":3600,
     "timeout":1,
+    "enable_cache":false,
     "blacklist_ips":["ip.txt"],
     "rules":[
         {
