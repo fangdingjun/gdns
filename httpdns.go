@@ -99,6 +99,11 @@ func (h *HTTPDns) Exchange(m *dns.Msg, addr string) (*dns.Msg, time.Duration, er
 		}
 		m1.Answer = append(m1.Answer, an)
 	}
+	m1.Truncated = r.TC
+	m1.RecursionDesired = r.RD
+	m1.RecursionAvailable = r.RA
+	m1.AuthenticatedData = r.AD
+	m1.CheckingDisabled = r.CD
 	return m1, 0, nil
 
 }
