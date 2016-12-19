@@ -78,7 +78,7 @@ func (h *dnsHandler) queryUpstream(r *dns.Msg, srv addr, ch chan *dns.Msg) {
 			dns.TypeToString[r.Question[0].Qtype],
 			srv.Host,
 			srv.Port)
-		m, _, err = h.tcpclient.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
+		m, _, err = h.udpclient.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
 	case "https":
 		info("query %s IN %s, forward to %s:%d through https",
 			r.Question[0].Name,
