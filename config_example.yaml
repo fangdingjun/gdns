@@ -1,0 +1,41 @@
+
+listen:
+    - network: tcp
+      host: 0.0.0.0
+      port: 1053
+      
+    - network: udp
+      host: 0.0.0.0
+      port: 1053
+
+blacklistfile: ./testdata/blacklist.dat
+hostfile: ./testdata/hosts
+timeout: 2
+debug: true
+
+defaultupstream:
+    -
+        network: tcp
+        host: 8.8.8.8
+        port: 53
+    -
+        network:udp
+        host: 8.8.8.8
+        port: 53
+        
+forwardrules:
+    - domainfile: ./testdata/cn.dat
+      server:
+          - network: tcp
+            host: 114.114.114.114
+            port: 53
+
+    - domainfile: testdata/us.dat
+      server:
+            - network: tcp
+              host: 8.8.8.8
+              port: 53
+              
+            - network: https
+              host: 74.175.200.100
+              port: 443
