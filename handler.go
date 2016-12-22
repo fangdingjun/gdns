@@ -22,8 +22,8 @@ type dnsHandler struct {
 func newDNSHandler(cfg *conf) *dnsHandler {
 	return &dnsHandler{
 		cfg:         cfg,
-		tcpclient:   &dns.Client{Net: "tcp", Timeout: 2 * time.Second},
-		udpclient:   &dns.Client{Net: "udp", Timeout: 2 * time.Second},
+		tcpclient:   &dns.Client{Net: "tcp", Timeout: 2 * time.Second, UDPSize: 4096},
+		udpclient:   &dns.Client{Net: "udp", Timeout: 2 * time.Second, UDPSize: 4096},
 		httpsclient: &GoogleHTTPDns{},
 	}
 
