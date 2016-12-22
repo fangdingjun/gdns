@@ -130,9 +130,9 @@ func (h *dnsHandler) inBlacklist(m *dns.Msg) bool {
 	var ip string
 	for _, rr := range m.Answer {
 		if a, ok := rr.(*dns.A); ok {
-			ip = a.String()
+			ip = a.A.String()
 		} else if aaaa, ok := rr.(*dns.AAAA); ok {
-			ip = aaaa.String()
+			ip = aaaa.AAAA.String()
 		} else {
 			ip = ""
 		}
