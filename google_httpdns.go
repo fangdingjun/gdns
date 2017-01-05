@@ -72,7 +72,7 @@ func (h *GoogleHTTPDns) getMyNet() string {
 	}
 	mask := net.IPv4Mask(255, 255, 255, 0)
 	ipByte := net.ParseIP(ip)
-	ipnet := net.IPNet{ipByte.Mask(mask), mask}
+	ipnet := net.IPNet{IP: ipByte.Mask(mask), Mask: mask}
 	return ipnet.String()
 }
 
