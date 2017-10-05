@@ -132,10 +132,10 @@ type RR struct {
 }
 
 var httpclient = &http.Client{
-	Timeout: 5 * time.Second,
+	Timeout: 8 * time.Second,
 	Transport: &http.Transport{
 		TLSClientConfig:     &tls.Config{ServerName: "dns.google.com"},
-		TLSHandshakeTimeout: 3 * time.Second,
+		TLSHandshakeTimeout: 5 * time.Second,
 	},
 }
 
