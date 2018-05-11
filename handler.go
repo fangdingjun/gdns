@@ -3,9 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/miekg/dns"
 	"strings"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
 type dnsClient interface {
@@ -16,7 +17,8 @@ type dnsHandler struct {
 	cfg         *conf
 	tcpclient   dnsClient
 	udpclient   dnsClient
-	httpsclient dnsClient
+	httpsgoogle dnsClient
+	httpscf     dnsClient
 }
 
 func newDNSHandler(cfg *conf) *dnsHandler {
@@ -24,7 +26,8 @@ func newDNSHandler(cfg *conf) *dnsHandler {
 		cfg:         cfg,
 		tcpclient:   &dns.Client{Net: "tcp", Timeout: 8 * time.Second, UDPSize: 4096},
 		udpclient:   &dns.Client{Net: "udp", Timeout: 5 * time.Second, UDPSize: 4096},
-		httpsclient: &GoogleHTTPDns{},
+		httpsgoogle: &GoogleHTTPDns{},
+		httpscf:     &CloudflareHTTPDns{},
 	}
 
 }
@@ -79,13 +82,20 @@ func (h *dnsHandler) queryUpstream(r *dns.Msg, srv addr, ch chan *dns.Msg) {
 			srv.Host,
 			srv.Port)
 		m, _, err = h.udpclient.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
-	case "https":
-		info("query %s IN %s, forward to %s:%d through https",
+	case "https_google":
+		info("query %s IN %s, forward to %s:%d through google https",
 			r.Question[0].Name,
 			dns.TypeToString[r.Question[0].Qtype],
 			srv.Host,
 			srv.Port)
-		m, _, err = h.httpsclient.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
+		m, _, err = h.httpsgoogle.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
+	case "https_cloudflare":
+		info("query %s IN %s, forward to %s:%d through cloudflare https",
+			r.Question[0].Name,
+			dns.TypeToString[r.Question[0].Qtype],
+			srv.Host,
+			srv.Port)
+		m, _, err = h.httpscf.Exchange(r, srv.Host)
 	default:
 		// ignore
 	}

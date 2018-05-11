@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"github.com/go-yaml/yaml"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/go-yaml/yaml"
 )
 
 type conf struct {

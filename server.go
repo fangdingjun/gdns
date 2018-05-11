@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/miekg/dns"
 	"log"
+
+	"github.com/miekg/dns"
 )
 
 func main() {

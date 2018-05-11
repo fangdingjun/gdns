@@ -4,13 +4,14 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/miekg/dns"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/miekg/dns"
 )
 
 // ServerAddr is Google dns server ip
