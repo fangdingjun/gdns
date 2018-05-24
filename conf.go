@@ -44,10 +44,6 @@ func loadConfig(f string) (*conf, error) {
 		return nil, err
 	}
 
-	if c.Debug {
-		logLevel = DEBUG
-	}
-
 	if c.blacklist == nil {
 		c.blacklist = item{}
 	}

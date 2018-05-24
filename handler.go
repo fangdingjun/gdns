@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fangdingjun/go-log"
 	"github.com/miekg/dns"
 )
 
@@ -69,28 +70,28 @@ func (h *dnsHandler) queryUpstream(r *dns.Msg, srv addr, ch chan *dns.Msg) {
 
 	switch srv.Network {
 	case "tcp":
-		info("query %s IN %s, forward to %s:%d through tcp",
+		log.Debugf("query %s IN %s, forward to %s:%d through tcp",
 			r.Question[0].Name,
 			dns.TypeToString[r.Question[0].Qtype],
 			srv.Host,
 			srv.Port)
 		m, _, err = h.tcpclient.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
 	case "udp":
-		info("query %s IN %s, forward to %s:%d through udp",
+		log.Debugf("query %s IN %s, forward to %s:%d through udp",
 			r.Question[0].Name,
 			dns.TypeToString[r.Question[0].Qtype],
 			srv.Host,
 			srv.Port)
 		m, _, err = h.udpclient.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
 	case "https_google":
-		info("query %s IN %s, forward to %s:%d through google https",
+		log.Debugf("query %s IN %s, forward to %s:%d through google https",
 			r.Question[0].Name,
 			dns.TypeToString[r.Question[0].Qtype],
 			srv.Host,
 			srv.Port)
 		m, _, err = h.httpsgoogle.Exchange(r, fmt.Sprintf("%s:%d", srv.Host, srv.Port))
 	case "https_cloudflare":
-		info("query %s IN %s, forward to %s:%d through cloudflare https",
+		log.Debugf("query %s IN %s, forward to %s:%d through cloudflare https",
 			r.Question[0].Name,
 			dns.TypeToString[r.Question[0].Qtype],
 			srv.Host,
@@ -106,7 +107,7 @@ func (h *dnsHandler) queryUpstream(r *dns.Msg, srv addr, ch chan *dns.Msg) {
 		default:
 		}
 	} else {
-		errorlog("%s", err)
+		log.Errorf("%s", err)
 	}
 }
 
@@ -130,7 +131,7 @@ func (h *dnsHandler) getAnswerFromUpstream(r *dns.Msg, servers []addr) (*dns.Msg
 			if savedErr != nil {
 				return savedErr, nil
 			}
-			info("query %s IN %s, timeout", r.Question[0].Name, dns.TypeToString[r.Question[0].Qtype])
+			log.Debugf("query %s IN %s, timeout", r.Question[0].Name, dns.TypeToString[r.Question[0].Qtype])
 			return nil, errors.New("timeout")
 		}
 	}
@@ -147,7 +148,7 @@ func (h *dnsHandler) inBlacklist(m *dns.Msg) bool {
 			ip = ""
 		}
 		if ip != "" && h.cfg.blacklist.exists(ip) {
-			info("%s in blacklist", ip)
+			log.Debugf("%s in blacklist", ip)
 			return true
 		}
 	}
@@ -168,7 +169,7 @@ func (h *dnsHandler) answerFromHosts(w dns.ResponseWriter, r *dns.Msg) bool {
 		msg.SetReply(r)
 		msg.Answer = append(msg.Answer, rr)
 		w.WriteMsg(msg)
-		info("query %s IN %s, reply from hosts", domain, dns.TypeToString[t])
+		log.Debugf("query %s IN %s, reply from hosts", domain, dns.TypeToString[t])
 		return true
 	}
 	return false
