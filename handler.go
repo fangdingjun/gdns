@@ -98,21 +98,22 @@ func (h *dnsHandler) queryUpstream(r *dns.Msg, srv addr, ch chan *dns.Msg) {
 			srv.Port)
 		m, _, err = h.httpscf.Exchange(r, srv.Host)
 	default:
-		// ignore
+		err = fmt.Errorf("not supported type %s", srv.Network)
 	}
 
-	if err == nil {
-		select {
-		case ch <- m:
-		default:
-		}
-	} else {
+	if err != nil {
 		log.Errorf("%s", err)
+		return
+	}
+
+	select {
+	case ch <- m:
+	default:
 	}
 }
 
 func (h *dnsHandler) getAnswerFromUpstream(r *dns.Msg, servers []addr) (*dns.Msg, error) {
-	ch := make(chan *dns.Msg, 5)
+	ch := make(chan *dns.Msg, len(servers))
 	for _, srv := range servers {
 		go func(a addr) {
 			h.queryUpstream(r, a, ch)
