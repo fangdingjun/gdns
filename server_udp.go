@@ -14,8 +14,13 @@ func (srv *server) handleUDP(buf []byte, addr net.Addr, conn *net.UDPConn) {
 		return
 	}
 	for _, up := range srv.upstreams {
+		log.Debugf("from %s query upstream %s", addr, up.String())
+		log.Debugln("query", msg.Question[0].String())
 		m, err := queryUpstream(msg, up)
 		if err == nil {
+			for _, a := range m.Answer {
+				log.Debugln("result", a.String())
+			}
 			d, _ := m.Pack()
 			conn.WriteTo(d, addr)
 			break

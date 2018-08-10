@@ -39,7 +39,7 @@ func (srv *server) serveUDP() {
 
 	udpconn, err := net.ListenUDP("udp", &net.UDPAddr{IP: _ip, Port: _port})
 	if err != nil {
-		log.Fatalf("listen udp error", err)
+		log.Fatalf("listen udp error %s", err)
 	}
 
 	defer udpconn.Close()

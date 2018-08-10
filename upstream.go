@@ -35,7 +35,6 @@ func queryUpstream(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
 }
 
 func queryUpstreamUDP(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
-	log.Debugln("query upstream", upstream.String())
 	m, _, err := dnsClientUDP.Exchange(msg, upstream.Host)
 	if err != nil {
 		log.Debugf("query udp error %s", err)
@@ -44,7 +43,6 @@ func queryUpstreamUDP(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
 }
 
 func queryUpstreamTCP(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
-	log.Debugln("query upstream", upstream.String())
 	m, _, err := dnsClientTCP.Exchange(msg, upstream.Host)
 	if err != nil {
 		log.Debugf("query tcp error %s", err)
@@ -53,7 +51,6 @@ func queryUpstreamTCP(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
 }
 
 func queryUpstreamTLS(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
-	log.Debugln("query upstream", upstream.String())
 	m, _, err := dnsClientTLS.Exchange(msg, upstream.Host)
 	if err != nil {
 		log.Debugf("query tls error %s", err)
@@ -62,7 +59,6 @@ func queryUpstreamTLS(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
 }
 
 func queryUpstreamHTTPS(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
-	log.Debugln("query upstream", upstream.String())
 	m, _, err := dnsClientHTTPS.Exchange(msg, upstream.String())
 	if err != nil {
 		log.Debugf("query https error %s", err)
