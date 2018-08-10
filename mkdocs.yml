@@ -1,8 +1,0 @@
-site_name: gdns
-docs_dir: docs
-pages:
-    - Usage: 'index.md'
-    - Command line options: 'command_line.md'
-    - Config example: 'ex_config.md'
-
-theme: readthedocs

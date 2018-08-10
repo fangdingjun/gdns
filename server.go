@@ -1,231 +1,160 @@
-/*
-gdns is a dns proxy server write by go.
-
-gdns much like dnsmasq or chinadns, but it can run on windows.
-
-Features:
-
-    support different domains use different upstream dns servers
-    support contact to the upstream dns server by tcp or udp
-    support blacklist list to block the fake ip
-
-Usage:
-
-generate a config file and edit it
-    $ gdns -dumpflags > dns.ini
-
-
-run it
-    $ sudo gdns -config dns.ini
-
-
-*/
 package main
 
 import (
-	"fmt"
-	lru "github.com/hashicorp/golang-lru"
-	"github.com/miekg/dns"
-	"log"
-	"strings"
+	"crypto/tls"
+	"net"
+	"net/url"
+	"strconv"
+
+	"github.com/fangdingjun/go-log"
 )
 
-var client_udp *dns.Client = &dns.Client{}
-
-var client_tcp *dns.Client = &dns.Client{Net: "tcp"}
-
-var Servers []*UpstreamServer = nil
-
-var logger *LogOut = nil
-
-var Blacklist_ips Kv = nil
-
-var debug bool = false
-
-var dns_cache *lru.Cache
-
-var hostfile string = ""
-var record_hosts Hosts = nil
-
-func in_blacklist(m *dns.Msg) bool {
-	if Blacklist_ips == nil {
-		return false
-	}
-
-	if m == nil {
-		return false
-	}
-
-	for _, rr := range m.Answer {
-		/* A */
-		if t, ok := rr.(*dns.A); ok {
-			ip := t.A.String()
-			if _, ok1 := Blacklist_ips[ip]; ok1 {
-				logger.Debug("%s is in blacklist\n", ip)
-				return true
-			}
-		}
-
-		/* AAAA */
-		if t, ok := rr.(*dns.AAAA); ok {
-			ip := t.AAAA.String()
-			if _, ok1 := Blacklist_ips[ip]; ok1 {
-				logger.Debug("%s is in blacklist\n", ip)
-				return true
-			}
-		}
-	}
-
-	return false
+type server struct {
+	addr      *url.URL
+	cert      string
+	key       string
+	upstreams []*url.URL
+	bootstrap []*url.URL
 }
 
-func handleRoot(w dns.ResponseWriter, r *dns.Msg) {
-	var err error
-	var res *dns.Msg
-	domain := r.Question[0].Name
-
-	/*
-	   reply from hosts
-	*/
-	if record_hosts != nil {
-		rr := record_hosts.Get(domain, r.Question[0].Qtype)
-		if rr != nil {
-			msg := new(dns.Msg)
-			msg.SetReply(r)
-			msg.Answer = append(msg.Answer, rr)
-			w.WriteMsg(msg)
-			logger.Debug("%s query %s %s %s, reply from hosts\n",
-				w.RemoteAddr(),
-				domain,
-				dns.ClassToString[r.Question[0].Qclass],
-				dns.TypeToString[r.Question[0].Qtype],
-			)
-			return
-		}
+func (srv *server) serve() {
+	switch srv.addr.Scheme {
+	case "udp":
+		srv.serveUDP()
+	case "tcp":
+		srv.serveTCP()
+	case "tls":
+		srv.serveTLS()
+	case "https":
+		srv.serveHTTPS()
+	default:
+		log.Fatalf("unsupported type %s", srv.addr.Scheme)
 	}
-
-	key := fmt.Sprintf("%s_%s", domain, dns.TypeToString[r.Question[0].Qtype])
-
-	if enable_cache {
-		// reply from cache
-		if a, ok := dns_cache.Get(key); ok {
-			msg := new(dns.Msg)
-			msg.SetReply(r)
-
-			aa := strings.Split(a.(string), "|")
-			for _, a1 := range aa {
-				rr, _ := dns.NewRR(a1)
-				if rr != nil {
-					msg.Answer = append(msg.Answer, rr)
-				}
-			}
-
-			w.WriteMsg(msg)
-			logger.Debug("%s query %s %s %s, reply from cache\n",
-				w.RemoteAddr(),
-				domain,
-				dns.ClassToString[r.Question[0].Qclass],
-				dns.TypeToString[r.Question[0].Qtype],
-			)
-			return
-		}
-	}
-
-	// forward to upstream server
-	for i := 0; i < 2; i++ {
-		for _, sv := range Servers {
-			if sv.match(domain) {
-
-				res, err = sv.query(r)
-				if err != nil {
-					logger.Error("%s", err)
-					continue
-				}
-
-				logger.Debug("%s query %s %s %s, forward to %s:%s, %s\n",
-					w.RemoteAddr(),
-					domain,
-					dns.ClassToString[r.Question[0].Qclass],
-					dns.TypeToString[r.Question[0].Qtype],
-					sv.Proto, sv.Addr,
-					dns.RcodeToString[res.Rcode],
-				)
-
-				if res.Rcode == dns.RcodeSuccess &&
-					!in_blacklist(res) && len(res.Answer) > 0 {
-					if enable_cache {
-						// add to cache
-						v := []string{}
-						for _, as := range res.Answer {
-							v = append(v, as.String())
-						}
-						dns_cache.Add(key, strings.Join(v, "|"))
-					}
-					w.WriteMsg(res)
-					return
-				}
-			}
-		}
-	}
-
-	// fallback to default upstream server
-	for i := 0; i < 2; i++ {
-		logger.Debug("%s query %s %s %s, use default server\n",
-			w.RemoteAddr(),
-			domain,
-			dns.ClassToString[r.Question[0].Qclass],
-			dns.TypeToString[r.Question[0].Qtype],
-		)
-		res := query(r)
-		if res != nil {
-			//logger.Debug("get: %s", res)
-			if enable_cache && res.Rcode == dns.RcodeSuccess &&
-				len(res.Answer) > 0 {
-				// add to cache
-				v := []string{}
-				for _, as := range res.Answer {
-					v = append(v, as.String())
-				}
-				dns_cache.Add(key, strings.Join(v, "|"))
-			}
-			w.WriteMsg(res)
-			return
-		}
-
-	}
-
-	dns.HandleFailed(w, r)
 }
 
-func main() {
-	parse_flags()
+func (srv *server) serveUDP() {
+	ip, port, _ := net.SplitHostPort(srv.addr.Host)
+	_ip := net.ParseIP(ip)
+	_port, _ := strconv.Atoi(port)
 
-	var err error
-	if enable_cache {
-		// create cache
-		dns_cache, err = lru.New(1000)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	dns.HandleFunc(".", handleRoot)
-
-	logger = NewLogger(logfile, debug)
-
-	logger.Info("Listen on %s\n", bind_addr)
-
-	go func() {
-		/* listen tcp */
-		err := dns.ListenAndServe(bind_addr, "tcp", nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	/* listen udp */
-	err = dns.ListenAndServe(bind_addr, "udp", nil)
+	udpconn, err := net.ListenUDP("udp", &net.UDPAddr{IP: _ip, Port: _port})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("listen udp error", err)
+	}
+
+	defer udpconn.Close()
+
+	buf := make([]byte, 4096)
+	for {
+		n, addr, err := udpconn.ReadFrom(buf)
+		if err != nil {
+			log.Debugln(err)
+			break
+		}
+		buf1 := make([]byte, n)
+		copy(buf1, buf[:n])
+		go srv.handleUDP(buf1, addr, udpconn)
+	}
+}
+
+func (srv *server) serveTCP() {
+	l, err := net.Listen("tcp", srv.addr.Host)
+	if err != nil {
+		log.Fatalln("listen tcp", err)
+	}
+	defer l.Close()
+	log.Debugf("listen tcp://%s", l.Addr().String())
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Debugln(err)
+			break
+		}
+		go srv.handleTCP(conn)
+	}
+}
+
+func (srv *server) serveTLS() {
+	cert, err := tls.LoadX509KeyPair(srv.cert, srv.key)
+	if err != nil {
+		log.Fatalln("load certificate failed", err)
+	}
+	l, err := tls.Listen("tcp", srv.addr.Host,
+		&tls.Config{
+			Certificates: []tls.Certificate{cert},
+			//NextProtos:   []string{"h2"},
+		})
+	if err != nil {
+		log.Fatalln("listen tls", err)
+	}
+	defer l.Close()
+	log.Debugf("listen tls://%s", l.Addr().String())
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Debugln("tls accept", err)
+			break
+		}
+		go srv.handleTCP(conn)
+	}
+}
+
+func (srv *server) serveHTTPS() {
+	cert, err := tls.LoadX509KeyPair(srv.cert, srv.key)
+	if err != nil {
+		log.Fatalln("load certificate failed", err)
+	}
+	l, err := tls.Listen("tcp", srv.addr.Host,
+		&tls.Config{
+			Certificates: []tls.Certificate{cert},
+			NextProtos:   []string{"h2"},
+		})
+	if err != nil {
+		log.Fatalln("listen https", err)
+	}
+	defer l.Close()
+	log.Debugf("listen https://%s", l.Addr().String())
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Debugln("https accept", err)
+			break
+		}
+		go srv.handleHTTPSConn(conn)
+	}
+}
+
+func makeServers(c *conf) {
+	upstreams := []*url.URL{}
+	bootstraps := []*url.URL{}
+	for _, a := range c.UpstreamServers {
+		u, err := url.Parse(a)
+		if err != nil {
+			log.Fatal(err)
+		}
+		upstreams = append(upstreams, u)
+	}
+
+	for _, a := range c.BootstrapServers {
+		u, err := url.Parse(a)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bootstraps = append(bootstraps, u)
+	}
+
+	for _, l := range c.Listen {
+		u, err := url.Parse(l.Addr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		srv := &server{
+			addr:      u,
+			cert:      l.Cert,
+			key:       l.Key,
+			upstreams: upstreams,
+			bootstrap: bootstraps,
+		}
+		go srv.serve()
 	}
 }

@@ -1,0 +1,40 @@
+# upstream servers
+# support DoH(DNS over https/http2), tcp, udp and tls(dns over tls)
+upstream_servers:
+  - https://cloudflare-dns.com/dns-query
+  - tcp://1.0.0.1:53
+  - udp://1.0.0.1:53
+  - tls://cloudflare-dns:853
+
+# bootstrap dns server,
+# this used to resolve the domain name used in Doh and TLS,
+# not needed if you don't use DoH and tls
+bootstrap_severs:
+  - tcp://1.0.0.1:53
+  - udp://1.0.0.1:53
+
+# listen ports
+listen:
+  -
+    addr: tcp://0.0.0.0:1053
+    cert:
+    key:
+  -
+    addr: udp://0.0.0.0:1053
+    cert: 
+    key:
+  -
+    addr: https://0.0.0.0:1054/dns-query
+    cert: server.crt
+    key: server.key
+  -
+    addr: tls://0.0.0.1:1055
+    cert: server.crt
+    key: server.key
+
+# timeout for upstream server, second
+upstream_timeout: 3
+
+# check upstream certificate or not
+# if you use self signed certificate, set this to true
+upstream_insecure: true
