@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/fangdingjun/go-log"
-	nghttp2 "github.com/fangdingjun/nghttp2-go"
+	//nghttp2 "github.com/fangdingjun/nghttp2-go"
 	"github.com/miekg/dns"
+	"golang.org/x/net/http2"
 )
 
 var dnsClientTCP *dns.Client
@@ -108,13 +109,13 @@ func initDNSClient(c *conf) {
 		Net:     "https",
 		Timeout: time.Duration(c.UpstreamTimeout) * time.Second,
 		HTTPClient: &http.Client{
-			Transport: &nghttp2.Transport{
-				DialTLS: func(network, addr string, cfg *tls.Config) (*tls.Conn, error) {
+			Transport: &http2.Transport{
+				DialTLS: func(network, addr string, cfg *tls.Config) (net.Conn, error) {
 					log.Debugln("dial to", network, addr)
 					conn, err := tls.DialWithDialer(dialer, network, addr, cfg)
 					return conn, err
 				},
-				TLSConfig: &tls.Config{
+				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: c.UpstreamInsecure,
 					NextProtos:         []string{"h2"},
 				},

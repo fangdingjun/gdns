@@ -7,8 +7,9 @@ import (
 	"net/http"
 
 	"github.com/fangdingjun/go-log"
-	"github.com/fangdingjun/nghttp2-go"
+	//"github.com/fangdingjun/nghttp2-go"
 	"github.com/miekg/dns"
+	"golang.org/x/net/http2"
 )
 
 func (srv *server) handleHTTPSConn(c net.Conn) {
@@ -23,12 +24,11 @@ func (srv *server) handleHTTPSConn(c net.Conn) {
 		log.Errorln("http2 is needed")
 		return
 	}
-	h2conn, err := nghttp2.Server(tlsconn, srv)
-	if err != nil {
-		log.Errorf("create http2 error: %s", err)
-		return
-	}
-	h2conn.Run()
+	_srv := &http2.Server{}
+	_srv.ServeConn(c, &http2.ServeConnOpts{
+		BaseConfig: &http.Server{},
+		Handler:    srv,
+	})
 }
 
 func (srv *server) handleHTTP2Req(w http.ResponseWriter, r *http.Request) {
