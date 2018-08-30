@@ -9,7 +9,7 @@ upstream_servers:
 # bootstrap dns server,
 # this used to resolve the domain name used in Doh and TLS,
 # not needed if you don't use DoH and tls
-bootstrap_severs:
+bootstrap_servers:
   - tcp://1.0.0.1:53
   - udp://1.0.0.1:53
 
@@ -37,4 +37,4 @@ upstream_timeout: 3
 
 # check upstream certificate or not
 # if you use self signed certificate, set this to true
-upstream_insecure: true
+upstream_insecure: false
