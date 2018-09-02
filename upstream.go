@@ -20,6 +20,31 @@ var dnsClientHTTPS *dns.Client
 var dnsClientUDP *dns.Client
 var dnsClientTLS *dns.Client
 
+func getResponseFromUpstream(msg *dns.Msg, upstreams []*url.URL) (*dns.Msg, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	resch := make(chan *dns.Msg, len(upstreams))
+
+	for _, up := range upstreams {
+		go func(u *url.URL) {
+			m, err := queryUpstream(msg, u)
+			if err == nil {
+				resch <- m
+				return
+			}
+			log.Errorln(u.String(), err)
+		}(up)
+	}
+
+	select {
+	case <-ctx.Done():
+		return nil, errors.New("time out")
+	case m := <-resch:
+		return m, nil
+	}
+}
+
 func queryUpstream(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
 	switch upstream.Scheme {
 	case "tcp":

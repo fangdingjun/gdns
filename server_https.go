@@ -50,28 +50,18 @@ func (srv *server) handleHTTP2Req(w http.ResponseWriter, r *http.Request) {
 		log.Errorln("parse dns message", err)
 		return
 	}
-	reply := false
-	for _, up := range srv.upstreams {
-		log.Debugf("from %s query upstream %s", r.RemoteAddr, up.String())
-		log.Debugln("query", msg.Question[0].String())
-		m, err := queryUpstream(msg, up)
-		if err == nil {
-			w.Header().Set("content-type", "application/dns-message")
-			w.WriteHeader(http.StatusOK)
-			for _, a := range m.Answer {
-				log.Debugln("result", a.String())
-			}
-			d, _ := m.Pack()
-			w.Write(d)
-			reply = true
-			break
-		} else {
-			log.Errorf("https query upstream %s", err)
-		}
-	}
-	if !reply {
+	m, err := getResponseFromUpstream(msg, srv.upstreams)
+	if err != nil {
+		log.Debugln("query", msg.Question[0].String(), "timeout")
 		w.WriteHeader(http.StatusServiceUnavailable)
+		return
 	}
+
+	for _, a := range m.Answer {
+		log.Debugln("result", a.String())
+	}
+	d, _ := m.Pack()
+	w.Write(d)
 }
 
 func (srv *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
