@@ -60,6 +60,7 @@ func (srv *server) handleHTTP2Req(w http.ResponseWriter, r *http.Request) {
 	for _, a := range m.Answer {
 		log.Debugln("result", a.String())
 	}
+	w.Header().Set("content-type", "application/dns-message")
 	d, _ := m.Pack()
 	w.Write(d)
 }
