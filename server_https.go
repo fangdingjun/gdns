@@ -9,10 +9,12 @@ import (
 	"github.com/miekg/dns"
 )
 
+const dnsMsgType = "application/dns-message"
+
 func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 	ctype := r.Header.Get("content-type")
-	if !strings.HasPrefix(ctype, "application/dns-message") {
-		log.Errorf("request type %s, require application/dns-message", ctype)
+	if !strings.HasPrefix(ctype, dnsMsgType) {
+		log.Errorf("request type %s, require %s", ctype, dnsMsgType)
 		http.Error(w, "dns message is required", http.StatusBadRequest)
 		return
 	}
@@ -45,7 +47,7 @@ func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 	for _, a := range m.Answer {
 		log.Debugln("result", a.String())
 	}
-	w.Header().Set("content-type", "application/dns-message")
+	w.Header().Set("content-type", dnsMsgType)
 	d, _ := m.Pack()
 	w.Write(d)
 }

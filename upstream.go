@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/fangdingjun/go-log"
-	//nghttp2 "github.com/fangdingjun/nghttp2-go"
 	"github.com/miekg/dns"
 	"golang.org/x/net/http2"
 )

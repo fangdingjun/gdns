@@ -35,6 +35,8 @@ func (lh *logHandler) Status() int {
 
 var _ http.ResponseWriter = &logHandler{}
 
+// LogHandler is a log middleware
+// record request log
 func LogHandler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -50,6 +52,5 @@ func LogHandler(handler http.Handler) http.Handler {
 		handler.ServeHTTP(lh, r)
 		log.Infof("\"%s %s %s\" - %d %d \"%s\"",
 			r.Method, r.RequestURI, r.Proto, lh.Status(), lh.size, r.UserAgent())
-
 	})
 }

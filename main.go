@@ -52,8 +52,12 @@ func main() {
 	if cfg.UpstreamTimeout == 0 {
 		cfg.UpstreamTimeout = 5
 	}
+
 	initDNSClient(cfg)
+
 	log.Debugf("%+v", cfg)
+
 	makeServers(cfg)
+
 	select {}
 }
