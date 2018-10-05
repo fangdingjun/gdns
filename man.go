@@ -22,7 +22,7 @@ func main() {
 	flag.Int64Var(&logFileSize, "log_size", 10, "max log file size MB")
 	flag.StringVar(&loglevel, "log_level", "INFO",
 		"log level, values:\nOFF, FATAL, PANIC, ERROR, WARN, INFO, DEBUG")
-	flag.StringVar(&configfile, "c", "", "config file")
+	flag.StringVar(&configfile, "c", "gdns.yaml", "config file")
 	flag.Parse()
 
 	if logfile != "" {

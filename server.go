@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"net"
+	"net/http"
 	"net/url"
 	"strconv"
 
@@ -100,27 +101,10 @@ func (srv *server) serveTLS() {
 }
 
 func (srv *server) serveHTTPS() {
-	cert, err := tls.LoadX509KeyPair(srv.cert, srv.key)
+	log.Debugf("listen https://%s", srv.addr.Host)
+	err := http.ListenAndServeTLS(srv.addr.Host, srv.cert, srv.key, LogHandler(srv))
 	if err != nil {
-		log.Fatalln("load certificate failed", err)
-	}
-	l, err := tls.Listen("tcp", srv.addr.Host,
-		&tls.Config{
-			Certificates: []tls.Certificate{cert},
-			NextProtos:   []string{"h2"},
-		})
-	if err != nil {
-		log.Fatalln("listen https", err)
-	}
-	defer l.Close()
-	log.Debugf("listen https://%s", l.Addr().String())
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Debugln("https accept", err)
-			break
-		}
-		go srv.handleHTTPSConn(conn)
+		log.Fatal(err)
 	}
 }
 

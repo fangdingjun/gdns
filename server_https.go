@@ -1,40 +1,25 @@
 package main
 
 import (
-	"crypto/tls"
 	"io/ioutil"
-	"net"
 	"net/http"
+	"strings"
 
 	"github.com/fangdingjun/go-log"
-	//"github.com/fangdingjun/nghttp2-go"
 	"github.com/miekg/dns"
-	"golang.org/x/net/http2"
 )
 
-func (srv *server) handleHTTPSConn(c net.Conn) {
-	defer c.Close()
-	tlsconn := c.(*tls.Conn)
-	if err := tlsconn.Handshake(); err != nil {
-		log.Errorln("handshake", err)
-		return
-	}
-	state := tlsconn.ConnectionState()
-	if state.NegotiatedProtocol != "h2" {
-		log.Errorln("http2 is needed")
-		return
-	}
-	_srv := &http2.Server{}
-	_srv.ServeConn(c, &http2.ServeConnOpts{
-		BaseConfig: &http.Server{},
-		Handler:    srv,
-	})
-}
-
-func (srv *server) handleHTTP2Req(w http.ResponseWriter, r *http.Request) {
+func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 	ctype := r.Header.Get("content-type")
-	if ctype != "application/dns-message" {
+	if !strings.HasPrefix(ctype, "application/dns-message") {
+		log.Errorf("request type %s, require application/dns-message", ctype)
 		http.Error(w, "dns message is required", http.StatusBadRequest)
+		return
+	}
+
+	if r.ContentLength < 10 {
+		log.Errorf("message is too small, %v", r.ContentLength)
+		http.Error(w, "message is too small", http.StatusBadRequest)
 		return
 	}
 
@@ -70,5 +55,5 @@ func (srv *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	srv.handleHTTP2Req(w, r)
+	srv.handleHTTPReq(w, r)
 }
