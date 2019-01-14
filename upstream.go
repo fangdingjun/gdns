@@ -9,15 +9,15 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/fangdingjun/go-log"
+	log "github.com/fangdingjun/go-log"
 	"github.com/miekg/dns"
 	"golang.org/x/net/http2"
 )
 
 var dnsClientTCP *dns.Client
-var dnsClientHTTPS *dns.Client
 var dnsClientUDP *dns.Client
 var dnsClientTLS *dns.Client
+var dnsClientHTTPS *httpclient
 
 func getResponseFromUpstream(msg *dns.Msg, upstreams []*url.URL) (*dns.Msg, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -129,7 +129,7 @@ func initDNSClient(c *conf) {
 		Net:     "tcp",
 		Timeout: time.Duration(c.UpstreamTimeout) * time.Second,
 	}
-	dnsClientHTTPS = &dns.Client{
+	dnsClientHTTPS = &httpclient{
 		Net:     "https",
 		Timeout: time.Duration(c.UpstreamTimeout) * time.Second,
 		HTTPClient: &http.Client{
