@@ -80,18 +80,21 @@ func (srv *server) serveTLS() {
 	if err != nil {
 		log.Fatalln("load certificate failed", err)
 	}
-	l, err := tls.Listen("tcp", srv.addr.Host,
-		&tls.Config{
-			Certificates: []tls.Certificate{cert},
-			//NextProtos:   []string{"h2"},
-		})
+
+	l, err := net.Listen("tcp", srv.addr.Host)
 	if err != nil {
 		log.Fatalln("listen tls", err)
 	}
 	defer l.Close()
+
 	log.Debugf("listen tls://%s", l.Addr().String())
+	tl := tls.NewListener(&protoListener{l}, &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		//NextProtos:   []string{"h2"},
+	})
+
 	for {
-		conn, err := l.Accept()
+		conn, err := tl.Accept()
 		if err != nil {
 			log.Debugln("tls accept", err)
 			break
@@ -102,8 +105,17 @@ func (srv *server) serveTLS() {
 
 func (srv *server) serveHTTPS() {
 	log.Debugf("listen https://%s", srv.addr.Host)
-	err := http.ListenAndServeTLS(srv.addr.Host, srv.cert, srv.key, LogHandler(srv))
+
+	l, err := net.Listen("tcp", srv.addr.Host)
 	if err != nil {
+		log.Fatalln("listen https", err)
+	}
+	defer l.Close()
+
+	httpsrv := &http.Server{
+		Handler: LogHandler(srv),
+	}
+	if err := httpsrv.ServeTLS(&protoListener{l}, srv.cert, srv.key); err != nil {
 		log.Fatal(err)
 	}
 }

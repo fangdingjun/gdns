@@ -43,14 +43,14 @@ func LogHandler(handler http.Handler) http.Handler {
 			if err := recover(); err != nil {
 				log.Error(err)
 				w.WriteHeader(http.StatusInternalServerError)
-				log.Infof("\"%s %s %s\" - %d %d \"%s\"",
-					r.Method, r.RequestURI, r.Proto, 500, 0, r.UserAgent())
+				log.Infof("\"%s - %s %s %s\" - %d %d \"%s\"",
+					r.RemoteAddr, r.Method, r.RequestURI, r.Proto, 500, 0, r.UserAgent())
 			}
 		}()
 
 		lh := &logHandler{w: w}
 		handler.ServeHTTP(lh, r)
-		log.Infof("\"%s %s %s\" - %d %d \"%s\"",
-			r.Method, r.RequestURI, r.Proto, lh.Status(), lh.size, r.UserAgent())
+		log.Infof("\"%s - %s %s %s\" - %d %d \"%s\"",
+			r.RemoteAddr, r.Method, r.RequestURI, r.Proto, lh.Status(), lh.size, r.UserAgent())
 	})
 }
