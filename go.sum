@@ -1,5 +1,7 @@
 github.com/fangdingjun/go-log v4.0.0+incompatible h1:h/3S0FRNiFR1A5xkK/ECHtmc2O/DVESKCzjhpgzszfA=
 github.com/fangdingjun/go-log v4.0.0+incompatible/go.mod h1:Y6ko/KySCpIcAX3mrfiUJtuPY2saPwofv9WYcUatPJY=
+github.com/fangdingjun/protolistener v0.0.0-20190413090244-355464816fc0 h1:dafx8KP2yvsX8oAFwJ6Bx54h3YE2P7UXLB453z7LbPo=
+github.com/fangdingjun/protolistener v0.0.0-20190413090244-355464816fc0/go.mod h1:bp6oYi3nsUwqGyzikoHJ672i9vX39Qp1h1C/r/vkIIg=
 github.com/go-yaml/yaml v2.1.0+incompatible h1:RYi2hDdss1u4YE7GwixGzWwVo47T8UQwnTLB6vQiq+o=
 github.com/go-yaml/yaml v2.1.0+incompatible/go.mod h1:w2MrLa16VYP0jy6N7M5kHaCkaLENm+P+Tv+MfurjSw0=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=

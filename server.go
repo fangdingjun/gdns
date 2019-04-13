@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/fangdingjun/go-log"
+	"github.com/fangdingjun/protolistener"
 )
 
 type server struct {
@@ -88,7 +89,7 @@ func (srv *server) serveTLS() {
 	defer l.Close()
 
 	log.Debugf("listen tls://%s", l.Addr().String())
-	tl := tls.NewListener(&protoListener{l}, &tls.Config{
+	tl := tls.NewListener(protolistener.New(l), &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		//NextProtos:   []string{"h2"},
 	})
@@ -115,7 +116,7 @@ func (srv *server) serveHTTPS() {
 	httpsrv := &http.Server{
 		Handler: LogHandler(srv),
 	}
-	if err := httpsrv.ServeTLS(&protoListener{l}, srv.cert, srv.key); err != nil {
+	if err := httpsrv.ServeTLS(protolistener.New(l), srv.cert, srv.key); err != nil {
 		log.Fatal(err)
 	}
 }
