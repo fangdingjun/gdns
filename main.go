@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/fangdingjun/go-log"
 )
@@ -53,6 +55,11 @@ func main() {
 	log.Debugf("%+v", cfg)
 
 	makeServers(cfg)
-
-	select {}
+	ch := make(chan os.Signal, 2)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case s := <-ch:
+		log.Errorf("received signal %s, exit...", s)
+	}
+	log.Println("exit.")
 }
