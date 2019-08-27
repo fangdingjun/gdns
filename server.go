@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -27,8 +28,10 @@ func (srv *server) serve() {
 		srv.serveTCP()
 	case "tls":
 		srv.serveTLS()
+	case "http":
+		srv.serveHTTP()
 	case "https":
-		srv.serveHTTPS()
+		srv.serveHTTP()
 	default:
 		log.Fatalf("unsupported type %s", srv.addr.Scheme)
 	}
@@ -104,8 +107,8 @@ func (srv *server) serveTLS() {
 	}
 }
 
-func (srv *server) serveHTTPS() {
-	log.Debugf("listen https://%s", srv.addr.Host)
+func (srv *server) serveHTTP() {
+	log.Debugf("listen %s://%s", srv.addr.Scheme, srv.addr.Host)
 
 	l, err := net.Listen("tcp", srv.addr.Host)
 	if err != nil {
@@ -116,7 +119,15 @@ func (srv *server) serveHTTPS() {
 	httpsrv := &http.Server{
 		Handler: LogHandler(srv),
 	}
-	if err := httpsrv.ServeTLS(protolistener.New(l), srv.cert, srv.key); err != nil {
+	switch srv.addr.Scheme {
+	case "http":
+		err = httpsrv.Serve(protolistener.New(l))
+	case "https":
+		err = httpsrv.ServeTLS(protolistener.New(l), srv.cert, srv.key)
+	default:
+		err = fmt.Errorf("not supported %s", srv.addr.Scheme)
+	}
+	if err != nil {
 		log.Fatal(err)
 	}
 }
