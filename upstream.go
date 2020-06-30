@@ -36,12 +36,23 @@ func getResponseFromUpstream(msg *dns.Msg, upstreams []*url.URL) (*dns.Msg, erro
 		}(up)
 	}
 
-	select {
-	case <-ctx.Done():
-		return nil, errors.New("time out")
-	case m := <-resch:
-		return m, nil
+	var errmsg *dns.Msg
+
+	for i := 0; i < len(upstreams); i++ {
+		select {
+		case <-ctx.Done():
+			return nil, errors.New("time out")
+		case m := <-resch:
+			if m.MsgHdr.Rcode == dns.RcodeSuccess {
+				return m, nil
+			}
+			errmsg = m
+		}
 	}
+	if errmsg != nil {
+		return errmsg, nil
+	}
+	return nil, errors.New("empty result")
 }
 
 func queryUpstream(msg *dns.Msg, upstream *url.URL) (*dns.Msg, error) {
