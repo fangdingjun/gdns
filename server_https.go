@@ -28,19 +28,21 @@ func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Errorln("read request body", err)
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, "read request failed", http.StatusBadRequest)
 		return
 	}
 
 	msg := new(dns.Msg)
 	if err := msg.Unpack(data); err != nil {
 		log.Errorln("parse dns message", err)
+		http.Error(w, "parse dns message error", http.StatusBadRequest)
 		return
 	}
+
 	m, err := getResponseFromUpstream(msg, srv.upstreams)
 	if err != nil {
 		log.Debugln("query", msg.Question[0].String(), "timeout")
-		w.WriteHeader(http.StatusServiceUnavailable)
+		http.Error(w, "query upstream server failed", http.StatusServiceUnavailable)
 		return
 	}
 
@@ -54,7 +56,7 @@ func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 
 func (srv *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.RequestURI != srv.addr.Path {
-		w.WriteHeader(http.StatusNotFound)
+		http.Error(w, "Path not found", http.StatusNotFound)
 		return
 	}
 	srv.handleHTTPReq(w, r)
