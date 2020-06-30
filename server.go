@@ -17,7 +17,6 @@ type server struct {
 	cert      string
 	key       string
 	upstreams []*url.URL
-	bootstrap []*url.URL
 }
 
 func (srv *server) serve() {
@@ -134,21 +133,13 @@ func (srv *server) serveHTTP() {
 
 func makeServers(c *conf) {
 	upstreams := []*url.URL{}
-	bootstraps := []*url.URL{}
+
 	for _, a := range c.UpstreamServers {
 		u, err := url.Parse(a)
 		if err != nil {
 			log.Fatal(err)
 		}
 		upstreams = append(upstreams, u)
-	}
-
-	for _, a := range c.BootstrapServers {
-		u, err := url.Parse(a)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bootstraps = append(bootstraps, u)
 	}
 
 	for _, l := range c.Listen {
@@ -161,7 +152,6 @@ func makeServers(c *conf) {
 			cert:      l.Cert,
 			key:       l.Key,
 			upstreams: upstreams,
-			bootstrap: bootstraps,
 		}
 		go srv.serve()
 	}
