@@ -3,7 +3,6 @@ package main
 import (
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/fangdingjun/go-log"
 	"github.com/miekg/dns"
@@ -12,12 +11,14 @@ import (
 const dnsMsgType = "application/dns-message"
 
 func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
-	ctype := r.Header.Get("content-type")
-	if !strings.HasPrefix(ctype, dnsMsgType) {
-		log.Errorf("request type %s, require %s", ctype, dnsMsgType)
-		http.Error(w, "dns message is required", http.StatusBadRequest)
-		return
-	}
+	/*
+		ctype := r.Header.Get("content-type")
+		if !strings.HasPrefix(ctype, dnsMsgType) {
+			log.Errorf("request type %s, require %s", ctype, dnsMsgType)
+			http.Error(w, "dns message is required", http.StatusBadRequest)
+			return
+		}
+	*/
 
 	if r.ContentLength < 10 {
 		log.Errorf("message is too small, %v", r.ContentLength)
