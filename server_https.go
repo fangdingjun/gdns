@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/fangdingjun/go-log"
+	log "github.com/fangdingjun/go-log/v5"
 	"github.com/miekg/dns"
 )
 

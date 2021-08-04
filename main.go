@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/fangdingjun/go-log"
+	log "github.com/fangdingjun/go-log/v5"
 )
 
 func main() {

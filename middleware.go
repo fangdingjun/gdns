@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/fangdingjun/go-log"
+	log "github.com/fangdingjun/go-log/v5"
 )
 
 type logHandler struct {

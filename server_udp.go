@@ -3,7 +3,7 @@ package main
 import (
 	"net"
 
-	"github.com/fangdingjun/go-log"
+	log "github.com/fangdingjun/go-log/v5"
 	"github.com/miekg/dns"
 )
 

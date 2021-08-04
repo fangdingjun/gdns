@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/fangdingjun/go-log"
+	log "github.com/fangdingjun/go-log/v5"
 	"github.com/miekg/dns"
 	"golang.org/x/net/http2"
 )
