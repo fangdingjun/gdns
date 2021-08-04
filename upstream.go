@@ -168,6 +168,9 @@ func initDNSClient(c *conf) {
 					fmt.Fprintf(conn, "CONNECT %s HTTP/1.1\r\nHost: %s\r\n\r\n", addr, addr)
 					r := bufio.NewReader(conn)
 					line, err := r.ReadString('\n')
+					if err != nil {
+						return nil, err
+					}
 					ss := strings.Fields(line)
 					if ss[1] != "200" {
 						return nil, fmt.Errorf("http code %s", ss[1])
