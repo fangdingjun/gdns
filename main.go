@@ -10,6 +10,8 @@ import (
 	log "github.com/fangdingjun/go-log/v5"
 )
 
+var cfg *conf
+
 func main() {
 	var configfile string
 	var logFileCount int
@@ -42,10 +44,12 @@ func main() {
 		log.Default.Level = lv
 	}
 
-	cfg, err := loadConfig(configfile)
+	_cfg, err := loadConfig(configfile)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	cfg = _cfg
 	if cfg.UpstreamTimeout == 0 {
 		cfg.UpstreamTimeout = 5
 	}

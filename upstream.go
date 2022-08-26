@@ -24,7 +24,7 @@ var dnsClientTLS *dns.Client
 var dnsClientHTTPS *httpclient
 
 func getResponseFromUpstream(msg *dns.Msg, upstreams []*url.URL) (*dns.Msg, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.UpstreamTimeout+1)*time.Second)
 	defer cancel()
 
 	resch := make(chan *dns.Msg, len(upstreams))
