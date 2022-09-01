@@ -27,6 +27,9 @@ func (srv *server) handleTCP(c net.Conn) {
 		for _, a := range m.Answer {
 			log.Debugln("result", a.String())
 		}
-		conn.WriteMsg(m)
+		if err := conn.WriteMsg(m); err != nil {
+			log.Errorln(err)
+			break
+		}
 	}
 }

@@ -24,5 +24,7 @@ func (srv *server) handleUDP(buf []byte, addr net.Addr, conn *net.UDPConn) {
 		log.Debugln("result", a.String())
 	}
 	d, _ := m.Pack()
-	conn.WriteTo(d, addr)
+	if _, err := conn.WriteTo(d, addr); err != nil {
+		log.Errorln(err)
+	}
 }

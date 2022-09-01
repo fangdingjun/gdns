@@ -52,7 +52,9 @@ func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("content-type", dnsMsgType)
 	d, _ := m.Pack()
-	w.Write(d)
+	if _, err := w.Write(d); err != nil {
+		log.Errorln(err)
+	}
 }
 
 func (srv *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
