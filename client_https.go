@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -45,7 +45,7 @@ func (c *httpclient) Exchange(msg *dns.Msg, upstream string) (*dns.Msg, int, err
 		return nil, 0, fmt.Errorf("http error %d", resp.StatusCode)
 	}
 
-	data, err = ioutil.ReadAll(resp.Body)
+	data, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, 0, err
 	}

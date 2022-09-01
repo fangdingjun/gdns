@@ -61,9 +61,7 @@ func main() {
 	makeServers(cfg)
 	ch := make(chan os.Signal, 2)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
-	select {
-	case s := <-ch:
-		log.Errorf("received signal %s, exit...", s)
-	}
+	s := <-ch
+	log.Errorf("received signal %s, exit...", s)
 	log.Println("exit.")
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/go-yaml/yaml"
 )
@@ -21,7 +21,7 @@ type listen struct {
 }
 
 func loadConfig(f string) (*conf, error) {
-	data, err := ioutil.ReadFile(f)
+	data, err := os.ReadFile(f)
 	if err != nil {
 		return nil, err
 	}

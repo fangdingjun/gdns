@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	log "github.com/fangdingjun/go-log/v5"
@@ -26,7 +26,7 @@ func (srv *server) handleHTTPReq(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Errorln("read request body", err)
 		http.Error(w, "read request failed", http.StatusBadRequest)
