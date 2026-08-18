@@ -7,7 +7,7 @@ require (
 	github.com/fangdingjun/protolistener v0.0.0-20210804081554-626e6590d6e7
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/miekg/dns v1.1.43
-	golang.org/x/net v0.54.0
+	golang.org/x/net v0.55.0
 )
 
 require (
